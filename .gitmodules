@@ -1,0 +1,3 @@
+[submodule ".submodules/utils"]
+	path = .submodules/utils
+	url = git@github.com:smpio/python-utils.git
