@@ -24,12 +24,6 @@ schedule_intervals = {
     'monthly': datetime.timedelta(days=30),
     'never': None,
 }
-default_maxcount_map = {
-    'daily': 7,
-    'weekly': 2,
-    'monthly': 1,
-    'never': 0,
-}
 
 
 def main():
@@ -37,11 +31,22 @@ def main():
     arg_parser.add_argument('--master', help='kubernetes api server url')
     arg_parser.add_argument('--in-cluster', action='store_true', help='configure with in-cluster config')
     arg_parser.add_argument('--log-level', default='WARNING')
+    arg_parser.add_argument('--default-maxcount', default='', help='daily=7,weekly=2,monthly=1')
     args = arg_parser.parse_args()
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=args.log_level)
     configure(args.master, args.in_cluster)
     install_shutdown_signal_handlers()
+
+    default_maxcount_map = {
+        'daily': 7,
+        'weekly': 2,
+        'monthly': 1,
+        'never': 0,
+    }
+    default_maxcount_map.update(parse_assignment_list(args.default_maxcount))
+    for k, v in default_maxcount_map.items():
+        default_maxcount_map[k] = int(v)
 
     api = kubernetes.client.CustomObjectsApi()
     v1 = kubernetes.client.CoreV1Api()
@@ -96,7 +101,6 @@ def create_snapshot(pvc):
     print(f'>>> {pvc.metadata.namespace}/{pvc.metadata.name}')
 
     api = kubernetes.client.CustomObjectsApi()
-    # ts = now().isoformat(sep='t', timespec='seconds').replace(':', '-')
     ts = now().strftime('%Y-%m-%d-%H-%M-%S')
 
     manifest = {
@@ -131,6 +135,14 @@ def create_snapshot(pvc):
 
 def now():
     return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+
+
+def parse_assignment_list(instr):
+    result = {}
+    for item in instr.split(','):
+        a, b = item.split('=', maxsplit=1)
+        result[a.strip()] = b.strip()
+    return result
 
 
 if __name__ == '__main__':
