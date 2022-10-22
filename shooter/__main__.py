@@ -24,6 +24,7 @@ schedule_intervals = {
     'monthly': datetime.timedelta(days=30),
     'never': None,
 }
+allowed_advance = datetime.timedelta(hours=1)
 
 
 def main():
@@ -68,7 +69,7 @@ def main():
             if pvc_snaps:
                 last_snap = pvc_snaps[-1]['metadata']['creationTimestamp']
                 interval = schedule_intervals[schedule]
-                if now() - last_snap >= interval:
+                if now() - last_snap >= interval - allowed_advance:
                     pvc_snaps.append(create_snapshot(pvc))
                 else:
                     log.info('%s/%s: already exists %s', pvc.metadata.namespace, pvc.metadata.name, last_snap)
