@@ -61,7 +61,7 @@ def main():
 
         ns_snaps = cache.get_snapshots(pvc.metadata.namespace)
         pvc_snaps = filter(lambda s: s['spec']['source']['persistentVolumeClaimName'] == pvc.metadata.name and
-                                     s['metadata']['labels'].get(source_label),
+                                     s['metadata'].get('labels', {}).get(source_label),
                            ns_snaps)
         pvc_snaps = sorted(pvc_snaps, key=lambda s: s['metadata']['creationTimestamp'])
 
