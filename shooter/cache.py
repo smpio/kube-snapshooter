@@ -13,7 +13,7 @@ class SnapshotCache:
         except KeyError:
             snaps = self._ns_cache[namespace] = self.api.list_namespaced_custom_object(
                 group='snapshot.storage.k8s.io',
-                version='v1beta1',
+                version='v1',
                 namespace=namespace,
                 plural='volumesnapshots',
             )['items']

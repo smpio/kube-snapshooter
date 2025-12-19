@@ -91,7 +91,7 @@ def main():
         for snap in snaps_to_delete:
             api.delete_namespaced_custom_object(
                 group='snapshot.storage.k8s.io',
-                version='v1beta1',
+                version='v1',
                 namespace=snap['metadata']['namespace'],
                 plural='volumesnapshots',
                 name=snap['metadata']['name'],
@@ -105,7 +105,7 @@ def create_snapshot(pvc):
     ts = now().strftime('%Y-%m-%d-%H-%M-%S')
 
     manifest = {
-        'apiVersion': 'snapshot.storage.k8s.io/v1beta1',
+        'apiVersion': 'snapshot.storage.k8s.io/v1',
         'kind': 'VolumeSnapshot',
         'metadata': {
             'name': f'{pvc.metadata.name}-{ts}',
@@ -127,7 +127,7 @@ def create_snapshot(pvc):
     log.info('creating snapshot %s/%s', pvc.metadata.namespace, manifest['metadata']['name'])
     return api.create_namespaced_custom_object(
         group='snapshot.storage.k8s.io',
-        version='v1beta1',
+        version='v1',
         namespace=pvc.metadata.namespace,
         plural='volumesnapshots',
         body=manifest,
