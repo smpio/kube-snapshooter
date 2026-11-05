@@ -8,6 +8,7 @@ from utils.kubernetes.config import configure
 from utils.signal import install_shutdown_signal_handlers
 
 from .cache import SnapshotCache
+from .selection import is_source_snapshot
 
 
 log = logging.getLogger(__name__)
@@ -60,8 +61,7 @@ def main():
         log.info('%s/%s: schedule %s', pvc.metadata.namespace, pvc.metadata.name, schedule)
 
         ns_snaps = cache.get_snapshots(pvc.metadata.namespace)
-        pvc_snaps = filter(lambda s: s['spec']['source']['persistentVolumeClaimName'] == pvc.metadata.name and
-                                     s['metadata'].get('labels', {}).get(source_label),
+        pvc_snaps = filter(lambda s: is_source_snapshot(s, pvc.metadata.name),
                            ns_snaps)
         pvc_snaps = sorted(pvc_snaps, key=lambda s: s['metadata']['creationTimestamp'])
 
